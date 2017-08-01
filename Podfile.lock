@@ -1,0 +1,15 @@
+PODS:
+  - Cartography (1.1.0)
+  - KYShutterButton (2.0.1)
+
+DEPENDENCIES:
+  - Cartography (~> 1.1)
+  - KYShutterButton (~> 2.0)
+
+SPEC CHECKSUMS:
+  Cartography: 0538ccb4044acbbda2266335fc58cb4228794d90
+  KYShutterButton: 794612eedc2ee75114326f7394703f0f49bf0882
+
+PODFILE CHECKSUM: 77863fde90dcbd4ec47ae28fea2f2f9ee235b953
+
+COCOAPODS: 1.0.1
