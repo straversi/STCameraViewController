@@ -22,23 +22,8 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
         
         // Set up the video preview view.
         previewView = PreviewView()
-//        previewView.videoPreviewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill
         self.view.addSubview(previewView)
         previewView.session = session
-        constrainPreviewToMode(.photo, bumpFrame: false)
-        
-        // Set up the switch camera button.
-        cameraButton = UIButton()
-        self.view.addSubview(cameraButton)
-        cameraButton.setTitle("Camera", for: .normal)
-        /* If this selector is failing, remove `fileprivate dynamic` from changeCamera. */
-        cameraButton.addTarget(self, action: #selector(changeCamera(_:)), for: .touchUpInside)
-        constrain(cameraButton, self.view) { button, superview in
-            button.right == superview.right
-            button.top == superview.top
-            button.width == 80.0
-            button.height == 30.0
-        }
         
         // Set up the live photo label
         capturingLivePhotoLabel = UILabel()
@@ -63,21 +48,6 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
             button.centerY == superview.centerY
             button.height == 30.0
             button.width == 160.0
-        }
-        
-        // Set up photo/movie segmented control
-        captureModeControl = UISegmentedControl()
-        self.view.addSubview(captureModeControl)
-        captureModeControl.setTitleTextAttributes([NSForegroundColorAttributeName: UIColor.white], for: .normal)
-        captureModeControl.insertSegment(withTitle: "Photo", at: CaptureMode.photo.rawValue, animated: false)
-        captureModeControl.insertSegment(withTitle: "Movie", at: CaptureMode.movie.rawValue, animated: false)
-        captureModeControl.selectedSegmentIndex = CaptureMode.photo.rawValue
-        captureModeControl.addTarget(self, action: #selector(toggleCaptureMode(_:)), for: .valueChanged)
-        constrain(captureModeControl, self.view) { control, superview in
-            control.bottom == superview.bottom - 60.0
-            control.width == 160.0
-            control.height == 30.0
-            control.centerX == superview.centerX
         }
         
         // Set up camera unavailable label
@@ -114,11 +84,27 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
         shutterButtons.takePhoto = self.capturePhoto
         shutterButtons.toggleRecord = self.toggleMovieRecording
         self.view.addSubview(shutterButtons.view)
-        constrain(shutterButtons.view, self.view) { buttons, superview in
-            buttons.height == 70.0
-            buttons.bottom == superview.bottom
-            buttons.left == superview.left
-            buttons.right == superview.right
+        
+        // Set up photo/movie segmented control
+        captureModeControl = UISegmentedControl()
+        self.view.addSubview(captureModeControl)
+        captureModeControl.setTitleTextAttributes([NSForegroundColorAttributeName: UIColor.white], for: .normal)
+        captureModeControl.insertSegment(withTitle: "Photo", at: CaptureMode.photo.rawValue, animated: false)
+        captureModeControl.insertSegment(withTitle: "Movie", at: CaptureMode.movie.rawValue, animated: false)
+        captureModeControl.selectedSegmentIndex = CaptureMode.photo.rawValue
+        captureModeControl.addTarget(self, action: #selector(toggleCaptureMode(_:)), for: .valueChanged)
+        
+        // Set up the switch camera button.
+        cameraButton = UIButton()
+        self.view.addSubview(cameraButton)
+        cameraButton.setImage(UIImage(named: "change-camera"), for: .normal)
+        /* If this selector is failing, remove `fileprivate dynamic` from changeCamera. */
+        cameraButton.addTarget(self, action: #selector(changeCamera(_:)), for: .touchUpInside)
+        constrain(cameraButton, shutterButtons.view, self.view) { button, bottomBar, superview in
+            button.right == superview.right
+            button.centerY == bottomBar.centerY
+            button.width == 75.0
+            button.height == 75.0
         }
         
         // Disable UI. The UI is enabled if and only if the session starts running.
@@ -250,44 +236,29 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
     
     // MARK: Layout
 
-    let topControlsHeight: CGFloat = 50
+    let topControlsHeight: CGFloat = 44
     
-    var aspectRatio: CGFloat = 1.0
+    var aspectRatio: CGFloat!
     
     var shutterButtons: ShutterButtonViewController!
     
-    var previewViewConstraintGroup: ConstraintGroup!
-    
     fileprivate func constrainPreviewToMode(_ captureMode: CaptureMode, bumpFrame: Bool) {
-        if previewViewConstraintGroup != nil {
-            constrain(clear: previewViewConstraintGroup)
-        }
         switch captureMode {
         case .photo:
-            print(self.previewView.videoPreviewLayer.frame)
-            // This won't work the first time. need to do this after the session is configured
-            // for the first time!
-            // TODO: just move call to constrainPreviewToMode from front of viewDidLoad to end
-            // of configureSession (called at end of viewDidLoad), possibly put in a
-            // dispatch async. woo!
             if let formatDescription = videoDeviceInput?.device.activeFormat.formatDescription {
                 let dimensions = CMVideoFormatDescriptionGetDimensions(formatDescription)
                 aspectRatio = CGFloat(dimensions.width) / CGFloat(dimensions.height)
             }
-            previewViewConstraintGroup = constrain(previewView, self.view) { preview, superview in
-                preview.left == superview.left
-                preview.top == superview.top
-                preview.width == superview.width
-                preview.height == superview.width * aspectRatio
-            }
+            previewView.frame = CGRect(x: 0, y: topControlsHeight, width: self.view.bounds.width, height: self.view.bounds.width * aspectRatio)
+            
+            // Constrain the shutter buttons and views that depend on it
+            captureModeControl.frame = CGRect(x: 0.0, y: previewView.frame.maxY + 8.0, width: self.view.bounds.width, height: 30.0)
+            // create width of 160?
+            captureModeControl.bounds = captureModeControl.frame.insetBy(dx: (self.view.frame.width - 160.0) / 2, dy: 0.0)
+            shutterButtons.view.frame = CGRect(x: 0.0, y: captureModeControl.frame.maxY, width: self.view.bounds.width, height: self.view.frame.height - captureModeControl.frame.maxY)
 
         case .movie:
-            previewViewConstraintGroup = constrain(previewView, self.view) { preview, superview in
-                preview.left == superview.left
-                preview.top == superview.top
-                preview.width == superview.width
-                preview.bottom == superview.bottom
-            }
+            previewView.frame = CGRect(x: 0, y: 0, width: self.view.bounds.width, height: self.view.bounds.height)
         }
     }
     
@@ -368,6 +339,9 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
                     }
                     
                     self.previewView.videoPreviewLayer.connection.videoOrientation = initialVideoOrientation
+                    
+                    // now that videoDeviceInput has been set, can update preview size
+                    self.constrainPreviewToMode(.photo, bumpFrame: false)
                 }
             }
             else {

@@ -14,7 +14,7 @@ I will be modifying this controller so that the UI mimics the default iOS camera
 
 I've added Cartography and KYShutterButton as dependencies for now.
 
-### To install
+### Installing dependencies
 
 ```
 gem install cocoapods
@@ -24,3 +24,8 @@ gem install cocoapods
 pod repo update
 pod install
 ```
+
+## Licensing
+
+Apple's license for AV Cam allows editing and distribution, only requiring inclusion of their license when the source is unmodified. I will most likely add an MIT license to this project.
+
