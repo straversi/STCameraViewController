@@ -252,7 +252,7 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
             previewView.frame = CGRect(x: 0, y: topControlsHeight, width: self.view.bounds.width, height: self.view.bounds.width * aspectRatio)
             
             // Constrain the shutter buttons and views that depend on it
-            captureModeControl.frame = CGRect(x: 0.0, y: previewView.frame.maxY + 8.0, width: self.view.bounds.width, height: 30.0)
+            captureModeControl.frame = CGRect(x: 0.0, y: previewView.frame.maxY + 8.0, width: self.view.bounds.width, height: 24.0)
             // create width of 160?
             captureModeControl.bounds = captureModeControl.frame.insetBy(dx: (self.view.frame.width - 160.0) / 2, dy: 0.0)
             shutterButtons.view.frame = CGRect(x: 0.0, y: captureModeControl.frame.maxY, width: self.view.bounds.width, height: self.view.frame.height - captureModeControl.frame.maxY)

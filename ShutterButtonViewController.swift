@@ -24,8 +24,8 @@ class ShutterButtonViewController: UIViewController {
         mainShutterButton.buttonColor = .white
         constrain(mainShutterButton, self.view) { button, superview in
             button.centerX == superview.centerX
-            button.width == 60.0
-            button.height == 60.0
+            button.width == 66.0
+            button.height == 66.0
             button.centerY == superview.centerY
         }
         mainShutterButton.addTarget(self, action: #selector(didTapMainShutter(_:)), for: .touchUpInside)
