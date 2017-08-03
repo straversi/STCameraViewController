@@ -75,7 +75,9 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
         // Set up the live photo toggle button
         livePhotoModeButton = UIButton()
         self.view.addSubview(livePhotoModeButton)
-        livePhotoModeButton.setTitle("Live Photo Mode: On", for: .normal)
+//        livePhotoModeButton.setTitle("Live Photo Mode: On", for: .normal)
+        livePhotoModeButton.setImage(UIImage(named: "live-photo")?.withRenderingMode(.alwaysTemplate), for: .normal)
+        livePhotoModeButton.tintColor = .yellow
         livePhotoModeButton.addTarget(self, action: #selector(toggleLivePhotoMode(_:)), for: .touchUpInside)
         constrain(livePhotoModeButton, self.view) { button, superview in
             button.top == superview.top
@@ -734,12 +736,14 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
             
             DispatchQueue.main.async { [unowned self] in
                 if livePhotoMode == .on {
-                    self.livePhotoModeButton.setTitle(NSLocalizedString("Live Photo Mode: On", comment: "Live photo mode button on title"), for: [])
+//                    self.livePhotoModeButton.setTitle(NSLocalizedString("Live Photo Mode: On", comment: "Live photo mode button on title"), for: [])
+                    self.livePhotoModeButton.tintColor = .yellow
                     self.capturingLivePhotoLabel.text = "LIVE"
                     self.flash(view: self.capturingLivePhotoLabel)
                 }
                 else {
-                    self.livePhotoModeButton.setTitle(NSLocalizedString("Live Photo Mode: Off", comment: "Live photo mode button off title"), for: [])
+//                    self.livePhotoModeButton.setTitle(NSLocalizedString("Live Photo Mode: Off", comment: "Live photo mode button off title"), for: [])
+                    self.livePhotoModeButton.tintColor = .white
                     self.capturingLivePhotoLabel.text = "OFF"
                     self.flash(view: self.capturingLivePhotoLabel)
                 }
