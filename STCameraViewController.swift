@@ -81,20 +81,26 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
         livePhotoModeButton.addTarget(self, action: #selector(toggleLivePhotoMode(_:)), for: .touchUpInside)
         constrain(livePhotoModeButton, self.view) { button, superview in
             button.top == superview.top
-            button.height == 30.0
-            button.width == 180.0
+            button.height == topControlsHeight
+            button.width == 50.0
             button.centerX == superview.centerX
         }
+        
+        // Bottom bar control area set up (shutter buttons and capture mode control)
+        bottomControls = UIView()
+        self.view.addSubview(bottomControls)
+        bottomControls.backgroundColor = .black
+        
         
         // Set up the take photo + record buttons
         shutterButtons = ShutterButtonViewController()
         shutterButtons.takePhoto = self.capturePhoto
         shutterButtons.toggleRecord = self.toggleMovieRecording
-        self.view.addSubview(shutterButtons.view)
+        bottomControls.addSubview(shutterButtons.view)
         
         // Set up photo/movie segmented control
         captureModeControl = UISegmentedControl()
-        self.view.addSubview(captureModeControl)
+        bottomControls.addSubview(captureModeControl)
         captureModeControl.setTitleTextAttributes([NSForegroundColorAttributeName: UIColor.white], for: .normal)
         captureModeControl.insertSegment(withTitle: "Photo", at: CaptureMode.photo.rawValue, animated: false)
         captureModeControl.insertSegment(withTitle: "Movie", at: CaptureMode.movie.rawValue, animated: false)
@@ -249,9 +255,14 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
     
     var shutterButtons: ShutterButtonViewController!
     
+    var bottomControls: UIView!
+    
     fileprivate func constrainPreviewToMode(_ captureMode: CaptureMode, bumpFrame: Bool) {
         switch captureMode {
         case .photo:
+            // set background color before frame change
+            bottomControls.backgroundColor = .black
+            
             if let formatDescription = videoDeviceInput?.device.activeFormat.formatDescription {
                 let dimensions = CMVideoFormatDescriptionGetDimensions(formatDescription)
                 aspectRatio = CGFloat(dimensions.width) / CGFloat(dimensions.height)
@@ -259,13 +270,19 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
             previewView.frame = CGRect(x: 0, y: topControlsHeight, width: self.view.bounds.width, height: self.view.bounds.width * aspectRatio)
             
             // Constrain the shutter buttons and views that depend on it
-            captureModeControl.frame = CGRect(x: 0.0, y: previewView.frame.maxY + 8.0, width: self.view.bounds.width, height: 24.0)
-            // create width of 160?
+            bottomControls.frame = CGRect(x: 0.0, y: previewView.frame.maxY, width: self.view.bounds.width, height: self.view.bounds.height - previewView.frame.maxY)
+            captureModeControl.frame = CGRect(x: 0.0, y: 8.0, width: bottomControls.bounds.width, height: 24.0)
+            // create width of 160
             captureModeControl.bounds = captureModeControl.frame.insetBy(dx: (self.view.frame.width - 160.0) / 2, dy: 0.0)
-            shutterButtons.view.frame = CGRect(x: 0.0, y: captureModeControl.frame.maxY, width: self.view.bounds.width, height: self.view.frame.height - captureModeControl.frame.maxY)
+            print(captureModeControl.frame.maxY)
+            print(bottomControls.bounds.height)
+            print(captureModeControl.frame.maxY)
+            shutterButtons.view.frame = CGRect(x: 0.0, y: captureModeControl.frame.maxY, width: bottomControls.bounds.width, height: bottomControls.bounds.height - captureModeControl.frame.maxY)
 
         case .movie:
             previewView.frame = CGRect(x: 0, y: 0, width: self.view.bounds.width, height: self.view.bounds.height)
+            // set background color after frame change
+            bottomControls.backgroundColor = UIColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.4)
         }
     }
     
