@@ -28,12 +28,16 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
         // Set up the live photo label
         capturingLivePhotoLabel = UILabel()
         self.view.addSubview(capturingLivePhotoLabel)
-        capturingLivePhotoLabel.text = "live"
-        capturingLivePhotoLabel.textColor = .white
+        capturingLivePhotoLabel.text = "LIVE"
+        capturingLivePhotoLabel.textColor = .black
+        capturingLivePhotoLabel.backgroundColor = .yellow
+        capturingLivePhotoLabel.layer.cornerRadius = 3
+        capturingLivePhotoLabel.layer.masksToBounds = true
+        capturingLivePhotoLabel.textAlignment = .center
         constrain(capturingLivePhotoLabel, self.view) { label, superview in
             label.top == superview.top + 30.0
-            label.height == 30.0
-            label.width == 160.0
+            label.height == 18.0
+            label.width == 40.0
             label.centerX == superview.centerX
         }
         
