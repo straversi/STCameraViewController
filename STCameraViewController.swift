@@ -34,6 +34,7 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
         capturingLivePhotoLabel.layer.cornerRadius = 3
         capturingLivePhotoLabel.layer.masksToBounds = true
         capturingLivePhotoLabel.textAlignment = .center
+        capturingLivePhotoLabel.alpha = 0.0
         constrain(capturingLivePhotoLabel, self.view) { label, superview in
             label.top == superview.top + 30.0
             label.height == 18.0
@@ -264,6 +265,15 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
         case .movie:
             previewView.frame = CGRect(x: 0, y: 0, width: self.view.bounds.width, height: self.view.bounds.height)
         }
+    }
+    
+    // Shows a view then fades it out after a delay
+    fileprivate func flash(view: UIView) {
+        view.alpha = 1.0
+        let animationDuration = 0.25
+        UIView.animate(withDuration: animationDuration, delay: 1.0, options: .curveEaseInOut, animations: { () -> Void in
+            view.alpha = 0
+        }, completion: nil)
     }
     
     // MARK: Session Management
@@ -679,10 +689,11 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
                     let inProgressLivePhotoCapturesCount = self.inProgressLivePhotoCapturesCount
                     DispatchQueue.main.async { [unowned self] in
                         if inProgressLivePhotoCapturesCount > 0 {
-                            self.capturingLivePhotoLabel.isHidden = false
+//                            self.capturingLivePhotoLabel.isHidden = false
+                            self.flash(view: self.capturingLivePhotoLabel)
                         }
                         else if inProgressLivePhotoCapturesCount == 0 {
-                            self.capturingLivePhotoLabel.isHidden = true
+//                            self.capturingLivePhotoLabel.isHidden = true
                         }
                         else {
                             print("Error: In progress live photo capture count is less than 0");
@@ -724,9 +735,13 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
             DispatchQueue.main.async { [unowned self] in
                 if livePhotoMode == .on {
                     self.livePhotoModeButton.setTitle(NSLocalizedString("Live Photo Mode: On", comment: "Live photo mode button on title"), for: [])
+                    self.capturingLivePhotoLabel.text = "LIVE"
+                    self.flash(view: self.capturingLivePhotoLabel)
                 }
                 else {
                     self.livePhotoModeButton.setTitle(NSLocalizedString("Live Photo Mode: Off", comment: "Live photo mode button off title"), for: [])
+                    self.capturingLivePhotoLabel.text = "OFF"
+                    self.flash(view: self.capturingLivePhotoLabel)
                 }
             }
         }
