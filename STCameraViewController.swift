@@ -223,11 +223,8 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
     }
     
     override var shouldAutorotate: Bool {
-        // Disable autorotation of the interface when recording is in progress.
-        if let movieFileOutput = movieFileOutput {
-            return !movieFileOutput.isRecording
-        }
-        return true
+        // Disable autorotation of the interface.
+        return false
     }
     
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
@@ -236,7 +233,9 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
+        print("view will transition")
         
+        // TODO: Need to do this when the rotation changes
         if let videoPreviewLayerConnection = previewView.videoPreviewLayer.connection {
             let deviceOrientation = UIDevice.current.orientation
             guard let newVideoOrientation = deviceOrientation.videoOrientation, deviceOrientation.isPortrait || deviceOrientation.isLandscape else {
@@ -924,6 +923,8 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
         NotificationCenter.default.addObserver(self, selector: #selector(subjectAreaDidChange), name: Notification.Name("AVCaptureDeviceSubjectAreaDidChangeNotification"), object: videoDeviceInput.device)
         NotificationCenter.default.addObserver(self, selector: #selector(sessionRuntimeError), name: Notification.Name("AVCaptureSessionRuntimeErrorNotification"), object: session)
         
+        NotificationCenter.default.addObserver(self, selector: #selector(orientationDidChange), name: NSNotification.Name.UIDeviceOrientationDidChange, object: nil)
+        
         /*
          A session can only run when the app is full screen. It will be interrupted
          in a multi-app layout, introduced in iOS 9, see also the documentation of
@@ -960,6 +961,19 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
         }
         else {
             super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
+        }
+    }
+    
+    func orientationDidChange(notification: NSNotification) {
+        switch(UIDevice.current.orientation) {
+        case .landscapeLeft:
+            print("landscape left")
+        case .landscapeRight:
+            print("landscape right")
+        case .portrait:
+            print("portrait babyyy")
+        default:
+            return
         }
     }
     
