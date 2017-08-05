@@ -968,10 +968,19 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
         switch(UIDevice.current.orientation) {
         case .landscapeLeft:
             print("landscape left")
+            UIView.animate(withDuration: 0.25, animations: { () in
+                self.cameraButton.transform = CGAffineTransform.identity.rotated(by: .pi / 2)
+            })
         case .landscapeRight:
             print("landscape right")
+            UIView.animate(withDuration: 0.25, animations: { () in
+                self.cameraButton.transform = CGAffineTransform.identity.rotated(by: .pi / -2)
+            })
         case .portrait:
             print("portrait babyyy")
+            UIView.animate(withDuration: 0.25, animations: { () in
+                self.cameraButton.transform = CGAffineTransform.identity.rotated(by: 0.0)
+            })
         default:
             return
         }
