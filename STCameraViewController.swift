@@ -42,6 +42,29 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
             label.centerX == superview.centerX
         }
         
+        // Set up the flash mode changer view
+        flashModeButton = UIButton()
+        self.view.addSubview(flashModeButton)
+        flashModeButton.setImage(UIImage(named: "live-photo")?.withRenderingMode(.alwaysTemplate), for: .normal)
+        flashModeButton.tintColor = .white
+        flashModeButton.addTarget(self, action: #selector(toggleFlashChoices), for: .touchUpInside)
+        constrain(flashModeButton, self.view) { button, superview in
+            button.top == superview.top
+            button.left == superview.left
+            button.height == topControlsHeight
+            button.width == 50.0
+        }
+        flashModeChoiceView = FlashChoiceViewController()
+        self.view.addSubview(flashModeChoiceView.view)
+        constrain(flashModeChoiceView.view, flashModeButton, self.view) { flashChoice, flashButton, superview in
+            flashChoice.left == flashButton.right + 10.0
+            flashChoice.top == superview.top
+            flashChoice.width == superview.width
+            flashChoice.height == topControlsHeight
+        }
+        flashModeChoiceView.view.isHidden = true
+        flashModeChoiceView.flashStateDidChange = self.setFlashMode
+        
         // Set up resume session button
         resumeButton = UIButton()
         self.view.addSubview(resumeButton)
@@ -653,6 +676,8 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
     
     private let photoOutput = AVCapturePhotoOutput()
     
+    private var flashMode = AVCaptureFlashMode.off
+    
     private var inProgressPhotoCaptureDelegates = [Int64 : PhotoCaptureDelegate]()
         
     fileprivate dynamic func capturePhoto() {
@@ -671,7 +696,7 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
             
             // Capture a JPEG photo with flash set to auto and high resolution photo enabled.
             let photoSettings = AVCapturePhotoSettings()
-            photoSettings.flashMode = .auto
+            photoSettings.flashMode = self.flashMode
             photoSettings.isHighResolutionPhotoEnabled = true
             if photoSettings.availablePreviewPhotoPixelFormatTypes.count > 0 {
                 photoSettings.previewPhotoFormat = [kCVPixelBufferPixelFormatTypeKey as String : photoSettings.availablePreviewPhotoPixelFormatTypes.first!]
@@ -734,6 +759,19 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
             self.inProgressPhotoCaptureDelegates[photoCaptureDelegate.requestedPhotoSettings.uniqueID] = photoCaptureDelegate
             self.photoOutput.capturePhoto(with: photoSettings, delegate: photoCaptureDelegate)
         }
+    }
+    
+    fileprivate func setFlashMode(mode: AVCaptureFlashMode) {
+        self.flashMode = mode
+        self.toggleFlashChoices()
+    }
+    
+    fileprivate var flashModeChoiceView: FlashChoiceViewController!
+    
+    fileprivate var flashModeButton: UIButton!
+    
+    fileprivate dynamic func toggleFlashChoices() {
+        flashModeChoiceView.view.isHidden = !flashModeChoiceView.view.isHidden
     }
     
     fileprivate enum LivePhotoMode {
