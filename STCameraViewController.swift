@@ -25,6 +25,12 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
         self.view.addSubview(previewView)
         previewView.session = session
         
+        // Bottom top control area set up (shutter buttons and capture mode control)
+        topControls = UIView()
+        self.view.addSubview(topControls)
+        topControls.backgroundColor = .black
+        topControls.frame = CGRect(x: 0.0, y: 0.0, width: self.view.frame.width, height: topControlsHeight)
+        
         // Set up the live photo label
         capturingLivePhotoLabel = UILabel()
         self.view.addSubview(capturingLivePhotoLabel)
@@ -44,37 +50,37 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
         
         // Set up the live photo toggle button
         livePhotoModeButton = UIButton()
-        self.view.addSubview(livePhotoModeButton)
+        topControls.addSubview(livePhotoModeButton)
         //        livePhotoModeButton.setTitle("Live Photo Mode: On", for: .normal)
         livePhotoModeButton.setImage(UIImage(named: "live-photo")?.withRenderingMode(.alwaysTemplate), for: .normal)
         livePhotoModeButton.tintColor = cameraYellow
         livePhotoModeButton.addTarget(self, action: #selector(toggleLivePhotoMode(_:)), for: .touchUpInside)
-        constrain(livePhotoModeButton, self.view) { button, superview in
+        constrain(livePhotoModeButton, topControls) { button, superview in
             button.top == superview.top
-            button.height == topControlsHeight
+            button.height == superview.height
             button.width == 50.0
             button.centerX == superview.centerX
         }
         
         // Set up the flash mode changer view
         flashModeButton = UIButton()
-        self.view.addSubview(flashModeButton)
+        topControls.addSubview(flashModeButton)
         flashModeButton.setImage(UIImage(named: "flash-off")?.withRenderingMode(.alwaysTemplate), for: .normal)
         flashModeButton.tintColor = .white
         flashModeButton.addTarget(self, action: #selector(toggleFlashChoices), for: .touchUpInside)
-        constrain(flashModeButton, self.view) { button, superview in
+        constrain(flashModeButton, topControls) { button, superview in
             button.top == superview.top
             button.left == superview.left
-            button.height == topControlsHeight
+            button.height == superview.height
             button.width == 50.0
         }
         flashModeChoiceView = FlashChoiceViewController()
-        self.view.addSubview(flashModeChoiceView.view)
-        constrain(flashModeChoiceView.view, flashModeButton, self.view) { flashChoice, flashButton, superview in
+        topControls.addSubview(flashModeChoiceView.view)
+        constrain(flashModeChoiceView.view, flashModeButton, topControls) { flashChoice, flashButton, superview in
             flashChoice.left == flashButton.right + 10.0
             flashChoice.top == superview.top
             flashChoice.width == superview.width
-            flashChoice.height == topControlsHeight
+            flashChoice.height == superview.height
         }
         flashModeChoiceView.view.isHidden = true
         flashModeChoiceView.flashStateDidChange = self.setFlashMode
@@ -280,6 +286,8 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
     
     var bottomControls: UIView!
     
+    var topControls: UIView!
+    
     let cameraYellow = UIColor(red: 0.75, green: 0.65, blue: 0.0, alpha: 1.0)
     
     fileprivate func constrainPreviewToMode(_ captureMode: CaptureMode, bumpFrame: Bool) {
@@ -287,6 +295,7 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
         case .photo:
             // set background color before frame change
             bottomControls.backgroundColor = .black
+            topControls.backgroundColor = .black
             
             if let formatDescription = videoDeviceInput?.device.activeFormat.formatDescription {
                 let dimensions = CMVideoFormatDescriptionGetDimensions(formatDescription)
@@ -308,6 +317,7 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
             previewView.frame = CGRect(x: 0, y: 0, width: self.view.bounds.width, height: self.view.bounds.height)
             // set background color after frame change
             bottomControls.backgroundColor = UIColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.4)
+            topControls.backgroundColor = UIColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.4)
         }
     }
     
