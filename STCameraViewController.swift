@@ -30,7 +30,7 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
         self.view.addSubview(capturingLivePhotoLabel)
         capturingLivePhotoLabel.text = "LIVE"
         capturingLivePhotoLabel.textColor = .black
-        capturingLivePhotoLabel.backgroundColor = .yellow
+        capturingLivePhotoLabel.backgroundColor = cameraYellow
         capturingLivePhotoLabel.layer.cornerRadius = 3
         capturingLivePhotoLabel.layer.masksToBounds = true
         capturingLivePhotoLabel.textAlignment = .center
@@ -42,10 +42,24 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
             label.centerX == superview.centerX
         }
         
+        // Set up the live photo toggle button
+        livePhotoModeButton = UIButton()
+        self.view.addSubview(livePhotoModeButton)
+        //        livePhotoModeButton.setTitle("Live Photo Mode: On", for: .normal)
+        livePhotoModeButton.setImage(UIImage(named: "live-photo")?.withRenderingMode(.alwaysTemplate), for: .normal)
+        livePhotoModeButton.tintColor = cameraYellow
+        livePhotoModeButton.addTarget(self, action: #selector(toggleLivePhotoMode(_:)), for: .touchUpInside)
+        constrain(livePhotoModeButton, self.view) { button, superview in
+            button.top == superview.top
+            button.height == topControlsHeight
+            button.width == 50.0
+            button.centerX == superview.centerX
+        }
+        
         // Set up the flash mode changer view
         flashModeButton = UIButton()
         self.view.addSubview(flashModeButton)
-        flashModeButton.setImage(UIImage(named: "live-photo")?.withRenderingMode(.alwaysTemplate), for: .normal)
+        flashModeButton.setImage(UIImage(named: "flash-off")?.withRenderingMode(.alwaysTemplate), for: .normal)
         flashModeButton.tintColor = .white
         flashModeButton.addTarget(self, action: #selector(toggleFlashChoices), for: .touchUpInside)
         constrain(flashModeButton, self.view) { button, superview in
@@ -95,20 +109,6 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
         let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(focusAndExposeTap(_:)))
         previewView.addGestureRecognizer(gestureRecognizer)
         
-        // Set up the live photo toggle button
-        livePhotoModeButton = UIButton()
-        self.view.addSubview(livePhotoModeButton)
-//        livePhotoModeButton.setTitle("Live Photo Mode: On", for: .normal)
-        livePhotoModeButton.setImage(UIImage(named: "live-photo")?.withRenderingMode(.alwaysTemplate), for: .normal)
-        livePhotoModeButton.tintColor = .yellow
-        livePhotoModeButton.addTarget(self, action: #selector(toggleLivePhotoMode(_:)), for: .touchUpInside)
-        constrain(livePhotoModeButton, self.view) { button, superview in
-            button.top == superview.top
-            button.height == topControlsHeight
-            button.width == 50.0
-            button.centerX == superview.centerX
-        }
-        
         // Bottom bar control area set up (shutter buttons and capture mode control)
         bottomControls = UIView()
         self.view.addSubview(bottomControls)
@@ -124,6 +124,7 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
         // Set up photo/movie segmented control
         captureModeControl = UISegmentedControl()
         bottomControls.addSubview(captureModeControl)
+        captureModeControl.tintColor = cameraYellow
         captureModeControl.setTitleTextAttributes([NSForegroundColorAttributeName: UIColor.white], for: .normal)
         captureModeControl.insertSegment(withTitle: "Photo", at: CaptureMode.photo.rawValue, animated: false)
         captureModeControl.insertSegment(withTitle: "Movie", at: CaptureMode.movie.rawValue, animated: false)
@@ -278,6 +279,8 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
     var shutterButtons: ShutterButtonViewController!
     
     var bottomControls: UIView!
+    
+    let cameraYellow = UIColor(red: 0.75, green: 0.65, blue: 0.0, alpha: 1.0)
     
     fileprivate func constrainPreviewToMode(_ captureMode: CaptureMode, bumpFrame: Bool) {
         switch captureMode {
@@ -505,6 +508,7 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
                     DispatchQueue.main.async {
                         self.livePhotoModeButton.isEnabled = true
                         self.livePhotoModeButton.isHidden = false
+                        self.flashModeChoiceView.view.backgroundColor = .black
                         self.constrainPreviewToMode(.photo, bumpFrame: true)
                     }
                 }
@@ -534,6 +538,7 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
                         // update shutter button UI
                         self.shutterButtons.setMode(mode: .movie)
                         self.shutterButtons.setMovieButtonEnabled(true)
+                        self.flashModeChoiceView.view.backgroundColor = UIColor.clear
                         self.constrainPreviewToMode(.movie, bumpFrame: true)
                     }
                 }
@@ -676,8 +681,6 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
     
     private let photoOutput = AVCapturePhotoOutput()
     
-    private var flashMode = AVCaptureFlashMode.off
-    
     private var inProgressPhotoCaptureDelegates = [Int64 : PhotoCaptureDelegate]()
         
     fileprivate dynamic func capturePhoto() {
@@ -761,9 +764,22 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
         }
     }
     
+    private var flashMode = AVCaptureFlashMode.off
+    
     fileprivate func setFlashMode(mode: AVCaptureFlashMode) {
         self.flashMode = mode
         self.toggleFlashChoices()
+        switch mode {
+        case .auto:
+            flashModeButton.setImage(UIImage(named: "flash-on")?.withRenderingMode(.alwaysTemplate), for: .normal)
+            flashModeButton.tintColor = .white
+        case .on:
+            flashModeButton.setImage(UIImage(named: "flash-on")?.withRenderingMode(.alwaysTemplate), for: .normal)
+            flashModeButton.tintColor = cameraYellow
+        case .off:
+            flashModeButton.setImage(UIImage(named: "flash-off")?.withRenderingMode(.alwaysTemplate), for: .normal)
+            flashModeButton.tintColor = .white
+        }
     }
     
     fileprivate var flashModeChoiceView: FlashChoiceViewController!
@@ -791,7 +807,7 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
             DispatchQueue.main.async { [unowned self] in
                 if livePhotoMode == .on {
 //                    self.livePhotoModeButton.setTitle(NSLocalizedString("Live Photo Mode: On", comment: "Live photo mode button on title"), for: [])
-                    self.livePhotoModeButton.tintColor = .yellow
+                    self.livePhotoModeButton.tintColor = self.cameraYellow
                     self.capturingLivePhotoLabel.text = "LIVE"
                     self.flash(view: self.capturingLivePhotoLabel)
                 }

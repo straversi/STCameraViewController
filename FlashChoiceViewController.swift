@@ -14,6 +14,8 @@ class FlashChoiceViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        self.view.backgroundColor = .black
 
         // Add and position each button
         autoButton = UIButton()
@@ -61,7 +63,7 @@ class FlashChoiceViewController: UIViewController {
     
     // UI elements
     
-    var state: AVCaptureFlashMode = .auto
+    var state: AVCaptureFlashMode = .off
     
     var autoButton: UIButton!
 
