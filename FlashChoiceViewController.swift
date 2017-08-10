@@ -20,6 +20,7 @@ class FlashChoiceViewController: UIViewController {
         // Add and position each button
         autoButton = UIButton()
         autoButton.setTitle("Auto", for: .normal)
+        autoButton.titleLabel?.font = UIFont.systemFont(ofSize: 13.5)
         autoButton.addTarget(self, action: #selector(setAuto), for: .touchUpInside)
         self.view.addSubview(autoButton)
         constrain(autoButton, self.view) { button, superview in
@@ -31,24 +32,26 @@ class FlashChoiceViewController: UIViewController {
         
         onButton = UIButton()
         onButton.setTitle("On", for: .normal)
+        onButton.titleLabel?.font = UIFont.systemFont(ofSize: 13.5)
         onButton.addTarget(self, action: #selector(setOn), for: .touchUpInside)
         self.view.addSubview(onButton)
         constrain(onButton, autoButton, self.view) { button, leftButton, superview in
             button.height == superview.height
             button.width == 40.0
             button.top == superview.top
-            button.left == leftButton.right + 10.0
+            button.left == leftButton.right + 20.0
         }
         
         offButton = UIButton()
         offButton.setTitle("Off", for: .normal)
+        offButton.titleLabel?.font = UIFont.systemFont(ofSize: 13.5)
         offButton.addTarget(self, action: #selector(setOff), for: .touchUpInside)
         self.view.addSubview(offButton)
         constrain(offButton, onButton, self.view) { button, leftButton, superview in
             button.height == superview.height
             button.width == 40.0
             button.top == superview.top
-            button.left == leftButton.right + 10.0
+            button.left == leftButton.right + 20.0
         }
         
     }

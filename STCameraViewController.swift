@@ -82,8 +82,9 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
             flashChoice.width == superview.width
             flashChoice.height == superview.height
         }
-        flashModeChoiceView.view.isHidden = true
         flashModeChoiceView.flashStateDidChange = self.setFlashMode
+        // will hide the flash choice view too
+        setFlashMode(mode: .off)
         
         // Set up resume session button
         resumeButton = UIButton()
@@ -774,21 +775,27 @@ class STCameraViewController: UIViewController, AVCaptureFileOutputRecordingDele
         }
     }
     
-    private var flashMode = AVCaptureFlashMode.off
+    private var flashMode: AVCaptureFlashMode!
     
     fileprivate func setFlashMode(mode: AVCaptureFlashMode) {
         self.flashMode = mode
         self.toggleFlashChoices()
+        flashModeChoiceView.autoButton.setTitleColor(.white, for: .normal)
+        flashModeChoiceView.onButton.setTitleColor(.white, for: .normal)
+        flashModeChoiceView.offButton.setTitleColor(.white, for: .normal)
         switch mode {
         case .auto:
             flashModeButton.setImage(UIImage(named: "flash-on")?.withRenderingMode(.alwaysTemplate), for: .normal)
             flashModeButton.tintColor = .white
+            flashModeChoiceView.autoButton.setTitleColor(cameraYellow, for: .normal)
         case .on:
             flashModeButton.setImage(UIImage(named: "flash-on")?.withRenderingMode(.alwaysTemplate), for: .normal)
             flashModeButton.tintColor = cameraYellow
+            flashModeChoiceView.onButton.setTitleColor(cameraYellow, for: .normal)
         case .off:
             flashModeButton.setImage(UIImage(named: "flash-off")?.withRenderingMode(.alwaysTemplate), for: .normal)
             flashModeButton.tintColor = .white
+            flashModeChoiceView.offButton.setTitleColor(cameraYellow, for: .normal)
         }
     }
     
